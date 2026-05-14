@@ -227,6 +227,11 @@ class SVM:
         self : SVM
         """
         X = np.asarray(X, dtype=np.float64)
+        if X.ndim != 2:
+            raise ValueError(
+                f"X must be a 2-D array of shape (n_samples, n_features), "
+                f"got shape {X.shape}."
+            )
         y = np.asarray(y, dtype=np.float64)
 
         unique_labels = set(np.unique(y))
