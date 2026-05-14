@@ -37,7 +37,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 02-01: Implementation of RBF/Polynomial kernels and final comparative report.
+- [x] 02-01: Implementation of RBF/Polynomial kernels and final comparative report. (completed 2026-05-15)
 
 ## Progress
 
