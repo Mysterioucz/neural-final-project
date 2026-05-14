@@ -152,9 +152,6 @@ def rbf_kernel(gamma: float) -> Callable[[np.ndarray, np.ndarray], np.ndarray]:
     return _kernel
 
 
-# Kernel names that accept additional parameters beyond the default gamma
-_PARAM_AWARE_KERNELS = {"poly"}
-
 # Parameters that belong exclusively to each kernel type
 _KERNEL_PARAMS: dict[str, set[str]] = {
     "linear": set(),
@@ -211,12 +208,12 @@ def get_kernel(
             f"Unsupported kernel '{kernel}'. Choose from {sorted(supported)}."
         )
 
-    # Warn about irrelevant parameters
-    irrelevant = _KERNEL_PARAMS.get(kernel, set())
+    # Warn about parameters that are irrelevant to the selected kernel
+    kernel_params = _KERNEL_PARAMS.get(kernel, set())
     provided_non_defaults = {}
-    if "degree" not in irrelevant and degree != 3:
+    if "degree" not in kernel_params and degree != 3:
         provided_non_defaults["degree"] = degree
-    if "coef0" not in irrelevant and coef0 != 0.0:
+    if "coef0" not in kernel_params and coef0 != 0.0:
         provided_non_defaults["coef0"] = coef0
 
     if provided_non_defaults:

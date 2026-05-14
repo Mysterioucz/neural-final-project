@@ -145,87 +145,96 @@ def _print_table(rows: list[dict]) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> int:
-    """Run kernel comparison. Returns exit code (0 = success, 1 = failure)."""
-    print("=" * 65)
-    print("  Kernel Comparison — Wisconsin Breast Cancer Dataset")
-    print("=" * 65)
+    """Run kernel comparison. Returns 0 on success, 1 on failure."""
+    try:
+        print("=" * 65)
+        print("  Kernel Comparison — Wisconsin Breast Cancer Dataset")
+        print("=" * 65)
 
-    # ---- Load and preprocess data ----------------------------------------
-    X_raw, y_raw = load_and_clean_data(DATA_PATH)
-    print(f"\nDataset: {X_raw.shape[0]} samples, {X_raw.shape[1]} features")
+        # ---- Load and preprocess data ----------------------------------------
+        X_raw, y_raw = load_and_clean_data(DATA_PATH)
+        print(f"\nDataset: {X_raw.shape[0]} samples, {X_raw.shape[1]} features")
 
-    y = encode_labels(y_raw)
-    X_np = X_raw.to_numpy()
+        y = encode_labels(y_raw)
+        X_np = X_raw.to_numpy()
 
-    X_train_raw, X_test_raw, y_train, y_test = train_test_split(
-        X_np, y, test_size=TEST_SIZE, random_state=RANDOM_STATE
-    )
-    print(f"Split  : {X_train_raw.shape[0]} train / {X_test_raw.shape[0]} test")
+        X_train_raw, X_test_raw, y_train, y_test = train_test_split(
+            X_np, y, test_size=TEST_SIZE, random_state=RANDOM_STATE
+        )
+        print(f"Split  : {X_train_raw.shape[0]} train / {X_test_raw.shape[0]} test")
 
-    scaler = ManualStandardScaler()
-    X_train = scaler.fit_transform(X_train_raw)
-    X_test = scaler.transform(X_test_raw)
+        scaler = ManualStandardScaler()
+        X_train = scaler.fit_transform(X_train_raw)
+        X_test = scaler.transform(X_test_raw)
 
-    # ---- Train and evaluate each kernel -----------------------------------
-    print()
-    results: list[dict] = []
+        # ---- Train and evaluate each kernel -----------------------------------
+        print()
+        results: list[dict] = []
 
-    for cfg in KERNEL_CONFIGS:
-        name = cfg["name"]
-        print(f"Training {name} SVM (C={cfg['C']}) ...", end=" ", flush=True)
+        for cfg in KERNEL_CONFIGS:
+            name = cfg["name"]
+            print(f"Training {name} SVM (C={cfg['C']}) ...", end=" ", flush=True)
 
-        svm = SVM(
-            C=cfg["C"],
-            kernel=cfg["kernel"],
-            gamma=cfg["gamma"],
-            degree=cfg["degree"],
-            coef0=cfg["coef0"],
+            svm = SVM(
+                C=cfg["C"],
+                kernel=cfg["kernel"],
+                gamma=cfg["gamma"],
+                degree=cfg["degree"],
+                coef0=cfg["coef0"],
+            )
+
+            t_start = time.perf_counter()
+            svm.fit(X_train, y_train)
+            t_elapsed = time.perf_counter() - t_start
+
+            y_pred = svm.predict(X_test)
+            acc = accuracy_score(y_test, y_pred)
+            prec = precision_score(y_test, y_pred, pos_label=1.0)
+            rec = recall_score(y_test, y_pred, pos_label=1.0)
+            n_sv = len(svm.alphas_)
+
+            print(f"done in {t_elapsed:.4f}s — Accuracy: {acc * 100:.2f}%")
+
+            results.append(
+                {
+                    "Kernel": name,
+                    "Accuracy": round(acc, 6),
+                    "Precision": round(prec, 6),
+                    "Recall": round(rec, 6),
+                    "Training_Time_s": round(t_elapsed, 6),
+                    "Support_Vectors": n_sv,
+                }
+            )
+
+        # ---- Print results table ----------------------------------------------
+        print()
+        _print_table(results)
+
+        # ---- Determine best kernel (by accuracy) ------------------------------
+        best = max(results, key=lambda r: float(r["Accuracy"]))
+        print(
+            f"\nBest Kernel : {best['Kernel']} "
+            f"(Accuracy: {float(best['Accuracy']) * 100:.2f}%)"
         )
 
-        t_start = time.perf_counter()
-        svm.fit(X_train, y_train)
-        t_elapsed = time.perf_counter() - t_start
+        # ---- Export to CSV ----------------------------------------------------
+        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+        with CSV_PATH.open("w", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=CSV_FIELDNAMES)
+            writer.writeheader()
+            writer.writerows(results)
 
-        y_pred = svm.predict(X_test)
-        acc = accuracy_score(y_test, y_pred)
-        prec = precision_score(y_test, y_pred, pos_label=1.0)
-        rec = recall_score(y_test, y_pred, pos_label=1.0)
-        n_sv = len(svm.alphas_)
+        try:
+            display_path = CSV_PATH.relative_to(pathlib.Path.cwd())
+        except ValueError:
+            display_path = CSV_PATH
+        print(f"\nResults saved to: {display_path}")
+        print()
+        return 0
 
-        print(f"done in {t_elapsed:.4f}s — Accuracy: {acc * 100:.2f}%")
-
-        results.append(
-            {
-                "Kernel": name,
-                "Accuracy": round(acc, 6),
-                "Precision": round(prec, 6),
-                "Recall": round(rec, 6),
-                "Training_Time_s": round(t_elapsed, 6),
-                "Support_Vectors": n_sv,
-            }
-        )
-
-    # ---- Print results table ----------------------------------------------
-    print()
-    _print_table(results)
-
-    # ---- Determine best kernel (by accuracy) ------------------------------
-    best = max(results, key=lambda r: float(r["Accuracy"]))
-    print(
-        f"\nBest Kernel : {best['Kernel']} "
-        f"(Accuracy: {float(best['Accuracy']) * 100:.2f}%)"
-    )
-
-    # ---- Export to CSV ----------------------------------------------------
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    with CSV_PATH.open("w", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=CSV_FIELDNAMES)
-        writer.writeheader()
-        writer.writerows(results)
-
-    print(f"\nResults saved to: {CSV_PATH.relative_to(pathlib.Path.cwd())}")
-    print()
-    return 0
+    except Exception as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
