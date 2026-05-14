@@ -177,10 +177,10 @@ class SVM:
         )  # shape (d,)
 
         # ---- Compute bias b ----------------------------------------------
-        # Use only "free" support vectors: 0 < alpha < C (on the margin)
-        free_mask = (self.alphas_ > self._ALPHA_THRESHOLD) & (
-            self.alphas_ < self.C - self._ALPHA_THRESHOLD
-        )
+        # Use only "free" support vectors: alpha < C (on the margin).
+        # The lower bound (> _ALPHA_THRESHOLD) is already guaranteed by
+        # sv_mask, so only the upper bound needs checking here.
+        free_mask = self.alphas_ < self.C - self._ALPHA_THRESHOLD
         if np.any(free_mask):
             free_sv = self.support_vectors_[free_mask]
             free_y = self.support_vector_labels_[free_mask]
