@@ -223,7 +223,11 @@ def main() -> int:
         writer.writeheader()
         writer.writerows(results)
 
-    print(f"\nResults saved to: {CSV_PATH.relative_to(pathlib.Path.cwd())}")
+    try:
+        display_path = CSV_PATH.relative_to(pathlib.Path.cwd())
+    except ValueError:
+        display_path = CSV_PATH
+    print(f"\nResults saved to: {display_path}")
     print()
     return 0
 
