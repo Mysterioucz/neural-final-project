@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-05-14)
 
 **Core value:** Transparent and mathematically rigorous classification using a custom-built SVM dual pipeline on real-world medical data.
-**Current focus:** Phase 1: Foundation & Linear SVM
+**Current focus:** Phase 2: Kernel Expansion & Analysis
 
 ## Current Position
 
-Phase: 1 of 2 (Foundation & Linear SVM)
-Plan: 2 of 2 in current phase
-Status: Phase Complete
-Last activity: 2026-05-14 — Completed 01-02 (SVM dual formulation and cvxopt integration).
+Phase: 2 of 2 (Kernel Expansion & Analysis)
+Plan: 0 of 1 in current phase
+Status: Ready
+Last activity: 2026-05-15 — Phase 1 UAT complete (8/8 passed). Advancing to Phase 2.
 
 Progress: [████░░░░░░] 66%
 
