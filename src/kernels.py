@@ -152,9 +152,6 @@ def rbf_kernel(gamma: float) -> Callable[[np.ndarray, np.ndarray], np.ndarray]:
     return _kernel
 
 
-# Kernel names that accept additional parameters beyond the default gamma
-_PARAM_AWARE_KERNELS = {"poly"}
-
 # Parameters that belong exclusively to each kernel type
 _KERNEL_PARAMS: dict[str, set[str]] = {
     "linear": set(),
