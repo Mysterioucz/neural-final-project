@@ -27,12 +27,22 @@ def raw_data():
 
 @pytest.fixture(scope="module")
 def pipeline_data(raw_data):
-    """Run the full preprocessing pipeline and return (X_scaled, y_encoded)."""
+    """Run the full preprocessing pipeline: split first, fit scaler on train only.
+
+    Returns (X_train, X_test, y_train, y_test) where X_train/X_test are
+    standardised using parameters derived solely from X_train, avoiding
+    data leakage into the test set.
+    """
     X, y = raw_data
     y_encoded = encode_labels(y)
+    X_np = np.asarray(X, dtype=np.float64)
+    X_train_raw, X_test_raw, y_train, y_test = train_test_split(
+        X_np, y_encoded, test_size=0.2, random_state=42
+    )
     scaler = ManualStandardScaler()
-    X_scaled = scaler.fit_transform(X)
-    return X_scaled, y_encoded
+    X_train = scaler.fit_transform(X_train_raw)
+    X_test = scaler.transform(X_test_raw)
+    return X_train, X_test, y_train, y_test
 
 
 class TestDataLoader:
@@ -69,19 +79,19 @@ class TestLabelEncoder:
 
     def test_labels_are_binary(self, pipeline_data):
         """Encoded labels must contain only 1.0 and -1.0."""
-        _, y_encoded = pipeline_data
-        unique = set(np.unique(y_encoded))
+        _, _, y_train, y_test = pipeline_data
+        unique = set(np.unique(np.concatenate([y_train, y_test])))
         assert unique == {1.0, -1.0}, f"Expected {{1.0, -1.0}}, got {unique}"
 
     def test_output_dtype_is_float64(self, pipeline_data):
         """Encoded label array must be float64."""
-        _, y_encoded = pipeline_data
-        assert y_encoded.dtype == np.float64
+        _, _, y_train, _ = pipeline_data
+        assert y_train.dtype == np.float64
 
     def test_label_length_matches_dataset(self, pipeline_data):
-        """Encoded label array must have 569 entries."""
-        _, y_encoded = pipeline_data
-        assert len(y_encoded) == 569
+        """Encoded labels (train + test) must total 569 entries."""
+        _, _, y_train, y_test = pipeline_data
+        assert len(y_train) + len(y_test) == 569
 
     def test_malignant_encoded_as_positive(self):
         """'M' must map to 1.0."""
@@ -103,27 +113,52 @@ class TestManualStandardScaler:
     """Tests for ManualStandardScaler."""
 
     def test_scaled_features_mean_near_zero(self, pipeline_data):
-        """After standardization, each feature must have mean approximately 0."""
-        X_scaled, _ = pipeline_data
-        col_means = np.mean(X_scaled, axis=0)
+        """After standardization, X_train features must have mean approximately 0.
+
+        The scaler is fit on train data only; X_train should have mean ≈ 0
+        by construction, proving the scaler was not re-fit on the test set.
+        """
+        X_train, _, _, _ = pipeline_data
+        col_means = np.mean(X_train, axis=0)
         np.testing.assert_allclose(
-            col_means, np.zeros(X_scaled.shape[1]), atol=1e-6,
-            err_msg="Scaled feature means are not approximately zero."
+            col_means, np.zeros(X_train.shape[1]), atol=1e-6,
+            err_msg="Scaled train feature means are not approximately zero."
         )
 
     def test_scaled_features_std_near_one(self, pipeline_data):
-        """After standardization, each feature must have std approximately 1."""
-        X_scaled, _ = pipeline_data
-        col_stds = np.std(X_scaled, axis=0)
+        """After standardization, X_train features must have std approximately 1.
+
+        The scaler is fit on train data only; X_train should have std ≈ 1
+        by construction, proving the scaler was not re-fit on the test set.
+        """
+        X_train, _, _, _ = pipeline_data
+        col_stds = np.std(X_train, axis=0)
         np.testing.assert_allclose(
-            col_stds, np.ones(X_scaled.shape[1]), atol=1e-4,
-            err_msg="Scaled feature std values are not approximately one."
+            col_stds, np.ones(X_train.shape[1]), atol=1e-4,
+            err_msg="Scaled train feature std values are not approximately one."
         )
 
     def test_scaled_output_shape(self, pipeline_data):
-        """Scaled feature matrix must retain the (569, 30) shape."""
-        X_scaled, _ = pipeline_data
-        assert X_scaled.shape == (569, 30)
+        """Train and test splits must each have 30 features and sum to 569 samples."""
+        X_train, X_test, _, _ = pipeline_data
+        assert X_train.shape[1] == 30
+        assert X_test.shape[1] == 30
+        assert X_train.shape[0] + X_test.shape[0] == 569
+
+    def test_test_set_stats_differ_from_train(self, pipeline_data):
+        """X_test mean/std should not be exactly 0/1 — proving scaler not re-fit on test data."""
+        X_train, X_test, _, _ = pipeline_data
+        test_means = np.mean(X_test, axis=0)
+        test_stds = np.std(X_test, axis=0)
+        # X_test was transformed with train statistics, so its column-wise
+        # mean and std will differ from exactly 0 and 1.
+        # At least some features should deviate by more than 1e-3.
+        assert not np.allclose(test_means, np.zeros(X_test.shape[1]), atol=1e-3), (
+            "X_test means are exactly 0, suggesting scaler was re-fit on test data."
+        )
+        assert not np.allclose(test_stds, np.ones(X_test.shape[1]), atol=1e-3), (
+            "X_test stds are exactly 1, suggesting scaler was re-fit on test data."
+        )
 
     def test_fit_stores_mean_and_std(self):
         """fit() must populate mean_ and std_ attributes."""
@@ -163,12 +198,16 @@ class TestTrainTestSplit:
         assert X_test.shape[0] == 20
 
     def test_split_shapes_on_actual_data(self, raw_data):
-        """Split on (569, 30) must give correct train/test sizes."""
+        """Split-then-scale on (569, 30) must give correct train/test sizes."""
         X, y = raw_data
         y_enc = encode_labels(y)
+        X_np = np.asarray(X, dtype=np.float64)
+        X_train_raw, X_test_raw, y_train, y_test = train_test_split(
+            X_np, y_enc, test_size=0.2, random_state=42
+        )
         scaler = ManualStandardScaler()
-        X_scaled = scaler.fit_transform(X)
-        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y_enc, test_size=0.2, random_state=42)
+        X_train = scaler.fit_transform(X_train_raw)
+        X_test = scaler.transform(X_test_raw)
         assert X_train.shape[0] + X_test.shape[0] == 569
         assert X_train.shape[1] == 30
         assert X_test.shape[1] == 30
