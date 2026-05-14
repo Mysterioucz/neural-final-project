@@ -95,8 +95,17 @@ class SVM:
             raise ValueError(
                 f"gamma must be a float or one of 'scale'/'auto', got '{gamma}'."
             )
-        if isinstance(gamma, float) and gamma <= 0:
-            raise ValueError(f"gamma must be positive when given as a float, got {gamma}.")
+        if not isinstance(gamma, str):
+            try:
+                gamma_f = float(gamma)
+            except (TypeError, ValueError):
+                raise ValueError(
+                    f"gamma must be a float or 'scale'/'auto', got {gamma!r}."
+                )
+            if gamma_f <= 0:
+                raise ValueError(
+                    f"gamma must be positive when given as a number, got {gamma}."
+                )
 
         # Warn about parameters irrelevant to the selected kernel
         if kernel == "linear" and degree != 3:
