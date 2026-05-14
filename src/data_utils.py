@@ -42,6 +42,12 @@ def train_test_split(X, y, test_size: float = 0.2, random_state: int | None = No
     X_arr = np.asarray(X)
     y_arr = np.asarray(y)
 
+    if X_arr.shape[0] != y_arr.shape[0]:
+        raise ValueError(
+            f"X and y must have the same number of samples, "
+            f"got X: {X_arr.shape[0]}, y: {y_arr.shape[0]}."
+        )
+
     n_samples = X_arr.shape[0]
     n_test = int(np.round(n_samples * test_size))
     n_train = n_samples - n_test
