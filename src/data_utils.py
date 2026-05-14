@@ -52,6 +52,12 @@ def train_test_split(X, y, test_size: float = 0.2, random_state: int | None = No
     n_test = int(np.round(n_samples * test_size))
     n_train = n_samples - n_test
 
+    if n_test == 0 or n_train == 0:
+        raise ValueError(
+            f"test_size={test_size} with {n_samples} samples produces an empty "
+            f"train or test set (n_train={n_train}, n_test={n_test})."
+        )
+
     rng = np.random.default_rng(random_state)
     indices = rng.permutation(n_samples)
 
