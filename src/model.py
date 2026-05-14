@@ -156,6 +156,11 @@ class SVM:
 
         # ---- Identify support vectors ------------------------------------
         sv_mask = alphas_all > self._ALPHA_THRESHOLD
+        if not np.any(sv_mask):
+            raise RuntimeError(
+                "No support vectors found (all alphas below threshold). "
+                "Try increasing C or reducing _ALPHA_THRESHOLD."
+            )
         self.support_vectors_ = X[sv_mask]          # (n_sv, d)
         self.support_vector_labels_ = y[sv_mask]    # (n_sv,)
         self.alphas_ = alphas_all[sv_mask]           # (n_sv,)
