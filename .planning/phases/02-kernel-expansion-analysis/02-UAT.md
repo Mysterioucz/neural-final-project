@@ -1,18 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 02-kernel-expansion-analysis
 source: [02-01-SUMMARY.md]
 started: 2026-05-15T00:00:00Z
-updated: 2026-05-15T00:00:00Z
+updated: 2026-05-15T01:00:00Z
 ---
 
 ## Current Test
 
-number: 5
-name: CSV report is produced
-expected: |
-  results/kernel_comparison.csv exists with header row + 3 data rows (one per kernel).
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -57,9 +53,9 @@ result: pass
 ## Summary
 
 total: 5
-passed: 4
+passed: 5
 issues: 0
-pending: 1
+pending: 0
 skipped: 0
 blocked: 0
 
