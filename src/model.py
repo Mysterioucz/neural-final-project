@@ -137,8 +137,11 @@ class SVM:
         X = np.asarray(X, dtype=np.float64)
         y = np.asarray(y, dtype=np.float64)
 
-        if set(np.unique(y)) - {1.0, -1.0}:
-            raise ValueError("Labels must be +1 and -1 only.")
+        unique_labels = set(np.unique(y))
+        if unknown := unique_labels - {1.0, -1.0}:
+            raise ValueError(f"Unknown labels: {unknown}. Expected +1 and -1.")
+        if not ({1.0, -1.0} <= unique_labels):
+            raise ValueError("Training data must contain both classes (+1 and -1).")
 
         n = X.shape[0]
 
