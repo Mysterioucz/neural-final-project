@@ -218,4 +218,7 @@ class SVM:
 
         X = np.asarray(X, dtype=np.float64)
         decision = X @ self.w_ + self.b_
-        return np.sign(decision)
+        raw = np.sign(decision)
+        # np.sign(0.0) == 0.0, which is not a valid class label.
+        # Tie-break: samples exactly on the decision boundary map to +1.
+        return np.where(raw == 0.0, 1.0, raw)
