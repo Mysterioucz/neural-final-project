@@ -7,7 +7,7 @@ This project implements a custom Support Vector Machine (SVM) using the Dual Lag
 ## Phases
 
 - [x] **Phase 1: Foundation & Linear SVM** - Data pipeline setup and baseline linear SVM implementation.
-- [ ] **Phase 2: Kernel Expansion & Analysis** - Non-linear kernel implementations and comparative evaluation.
+- [x] **Phase 2: Kernel Expansion & Analysis** - Non-linear kernel implementations and comparative evaluation.
 
 ## Phase Details
 
@@ -44,4 +44,4 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Linear SVM | 2/2 | Complete | 2026-05-14 |
-| 2. Kernel Expansion & Analysis | 0/1 | Not started | - |
+| 2. Kernel Expansion & Analysis | 1/1 | Complete | 2026-05-15 |
