@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-05-14)
 ## Current Position
 
 Phase: 1 of 2 (Foundation & Linear SVM)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-05-14 — Completed 01-01 (Data preprocessing pipeline).
+Plan: 2 of 2 in current phase
+Status: Phase Complete
+Last activity: 2026-05-14 — Completed 01-02 (SVM dual formulation and cvxopt integration).
 
-Progress: [██░░░░░░░░] 33%
+Progress: [████░░░░░░] 66%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
+- Total plans completed: 2
 - Average duration: 2 min
-- Total execution time: 0.03 hours
+- Total execution time: 0.07 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1 | 1 | 2 min | 2 min |
+| 1 | 2 | 4 min | 2 min |
 | 2 | 0 | 0 | 0 |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min)
+- Last 5 plans: 01-01 (2 min), 01-02 (2 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -48,6 +48,10 @@ Recent decisions affecting current work:
 - [01-01]: Epsilon=1e-8 in ManualStandardScaler std_ to prevent division-by-zero on constant features.
 - [01-01]: encode_labels raises ValueError on unknown labels for early dataset corruption detection.
 - [01-01]: np.random.default_rng used over legacy np.random.seed for cleaner reproducibility semantics.
+- [01-02]: 1e-8 ridge added to P matrix to guarantee positive semi-definiteness for cvxopt solver.
+- [01-02]: Bias computed from free support vectors (0 < alpha < C) for numerical stability; falls back to all SVs if none free.
+- [01-02]: predict() uses O(d) linear w,b path rather than kernel expansion over support vectors.
+- [01-02]: cvxopt.solvers.options['show_progress'] = False set globally at module import.
 
 ### Pending Todos
 
@@ -56,11 +60,11 @@ None yet.
 ### Blockers/Concerns
 
 - [Data]: RESOLVED — preprocessing pipeline complete (01-01).
-- [Math]: QP solver integration requires precise matrix mapping (pending 01-02).
+- [Math]: RESOLVED — QP solver integrated with correct P,q,G,h,A,b mapping (01-02). 99.12% accuracy achieved.
 - [Env]: pyenv version 3.12 not installed; pytest runs via `PYENV_VERSION=system python3 -m pytest`.
 
 ## Session Continuity
 
-Last session: 2026-05-14T16:29:41Z
-Stopped at: Completed 01-01-PLAN.md — data preprocessing pipeline.
+Last session: 2026-05-14T16:36:41Z
+Stopped at: Completed 01-02-PLAN.md — SVM dual formulation and cvxopt integration. Phase 1 complete.
 Resume file: None
