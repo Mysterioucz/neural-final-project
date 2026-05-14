@@ -84,6 +84,9 @@ class SVM:
         if C <= 0:
             raise ValueError(f"C must be positive, got {C}.")
 
+        if degree < 1:
+            raise ValueError(f"degree must be a positive integer, got {degree}.")
+
         supported_kernels = {"linear", "rbf", "poly"}
         if kernel not in supported_kernels:
             raise ValueError(
