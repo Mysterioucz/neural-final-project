@@ -17,12 +17,19 @@ Transparent and mathematically rigorous classification using a custom-built SVM 
 
 ### Active
 
-- [ ] Data preprocessing pipeline (scaling, encoding, train/test split)
-- [ ] Custom SVM class implementing the Dual Lagrangian formulation
-- [ ] Implementation of Linear, RBF, and Polynomial kernel functions
-- [ ] Integration with a QP optimizer library (e.g., `cvxopt` or `scipy.optimize`)
-- [ ] Comprehensive evaluation (Accuracy, Confusion Matrix)
-- [ ] Performance comparison between different kernels
+None — all requirements validated.
+
+### Validated in Phase 1 (Foundation & Linear SVM)
+
+- ✓ Data preprocessing pipeline (scaling, encoding, train/test split) — Validated in Phase 1
+- ✓ Custom SVM class implementing the Dual Lagrangian formulation — Validated in Phase 1
+- ✓ Integration with a QP optimizer library (`cvxopt`) — Validated in Phase 1
+- ✓ Comprehensive evaluation (Accuracy, Confusion Matrix) — Validated in Phase 1: 99.12% accuracy
+
+### Validated in Phase 2 (Kernel Expansion & Analysis)
+
+- ✓ Implementation of Linear, RBF, and Polynomial kernel functions — Validated in Phase 2
+- ✓ Performance comparison between different kernels — Validated in Phase 2: all kernels achieve 99.12% accuracy
 
 ### Out of Scope
 
@@ -44,8 +51,8 @@ Transparent and mathematically rigorous classification using a custom-built SVM 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| **Dual Formulation** | Allows the "Kernel Trick" to be easily integrated for non-linear classification. | — Pending |
-| **B: Library Optimizer** | Balancing the pedagogical value of implementing the SVM logic with the stability of a production-grade QP solver. | — Pending |
+| **Dual Formulation** | Allows the "Kernel Trick" to be easily integrated for non-linear classification. | Validated — RBF/Polynomial kernels integrated via kernel expansion in Phase 2 |
+| **B: Library Optimizer** | Balancing the pedagogical value of implementing the SVM logic with the stability of a production-grade QP solver. | Validated — `cvxopt` solved QP correctly; 99.12% accuracy across all kernels |
 
 ## Evolution
 
@@ -65,4 +72,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-14 after initialization*
+*Last updated: 2026-05-15 — Phase 2 complete. Project milestone achieved.*
