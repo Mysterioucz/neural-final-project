@@ -14,7 +14,8 @@ from src.preprocessing import ManualStandardScaler
 from src.data_utils import train_test_split
 
 DATA_PATH = "data/data.csv"
-RANDOM_STATE = 42
+RANDOM_STATE = 21
+C = 1.0
 
 def visualize_kernels():
     # 1. Load and prepare data
@@ -37,11 +38,32 @@ def visualize_kernels():
     
     # Define kernels to compare
     kernel_configs = [
-        {"name": "Linear", "kernel": "linear", "C": 1.0},
-        {"name": "RBF", "kernel": "rbf", "C": 1.0, "gamma": "scale"},
-        {"name": "Polynomial (d=3)", "kernel": "poly", "C": 1.0, "degree": 3}
-    ]
-    
+    {
+        "name": "Linear",
+        "kernel": "linear",
+        "C": C,
+        "gamma": "scale",
+        "degree": 3,
+        "coef0": 0.0,
+    },
+    {
+        "name": "RBF",
+        "kernel": "rbf",
+        "C": C,
+        "gamma": "scale",
+        "degree": 3,
+        "coef0": 0.0,
+    },
+    {
+        "name": "Polynomial (d=3)",
+        "kernel": "poly",
+        "C": C,
+        "gamma": "scale",
+        "degree": 3,
+        "coef0": 1.0,
+    },
+]
+
     fig, axes = plt.subplots(1, 3, figsize=(20, 6))
     
     # Create meshgrid once for all plots
@@ -82,7 +104,7 @@ def visualize_kernels():
         y_pred = model.predict(X_test)
         accuracy = np.mean(y_pred == y_test)
         
-        ax.set_title(f"{config['name']} Kernel\nAccuracy: {accuracy * 100:.2f}%")
+        ax.set_title(f"{config['name']} Kernel")
         ax.set_xlabel('Std radius_mean')
         if i == 0:
             ax.set_ylabel('Std texture_mean')
